@@ -106,7 +106,7 @@ namespace PROG6212_New_POE.Controllers
         [HttpPost]
         public IActionResult VerifyClaims(int claimId, string action)
         {
-            var claim = Claims.FirstOrDefault(c => c.ClaimId == claimId);
+            var claim = Claims.FirstOrDefault(c => c.ClaimID == claimId);
             if (claim != null)
             {
                 claim.Status = action == "Approve" ? "Approved" : "Rejected";

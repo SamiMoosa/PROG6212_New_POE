@@ -23,7 +23,7 @@
         @foreach (var claim in Model)
         {
             <tr>
-                <td>@claim.ClaimId</td>
+                <td>@claim.ClaimID</td>
                 <td>@claim.FirstName @claim.LastName</td>
                 <td>@claim.HoursWorked</td>
                 <td>@claim.HourlyRate</td>
@@ -32,7 +32,7 @@
                 <td>@claim.FileName</td>
                 <td>
                     <form method="post" asp-action="VerifyClaims">
-                        <input type="hidden" name="claimId" value="@claim.ClaimId" />
+                        <input type="hidden" name="claimId" value="@claim.ClaimID" />
                         <button type="submit" name="action" value="Approve" class="btn btn-success">Approve</button>
                         <button type="submit" name="action" value="Reject" class="btn btn-danger">Reject</button>
                     </form>
