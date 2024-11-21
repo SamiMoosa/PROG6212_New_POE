@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<PROG6212_New_POE.Models.Claim>
+
+@{
     ViewData["Title"] = "Track Claims";
 }
 
@@ -16,7 +18,36 @@
     <button type="submit" class="btn btn-primary">Track Claims</button>
 </form>
 
-@if (ViewBag.Message != null)
+@if (Model != null && Model.Any())
+{
+    <h3>Claim Results:</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Claim ID</th>
+                <th>Hours Worked</th>
+                <th>Hourly Rate</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>File Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model)
+            {
+                <tr>
+                    <td>@claim.ClaimID</td>
+                    <td>@claim.HoursWorked</td>
+                    <td>@claim.HourlyRate</td>
+                    <td>@(claim.HoursWorked * claim.HourlyRate)</td>
+                    <td>@claim.Status</td>
+                    <td>@claim.FileName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (ViewBag.Message != null)
 {
     <div class="alert alert-info">@ViewBag.Message</div>
 }
