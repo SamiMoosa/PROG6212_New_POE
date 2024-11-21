@@ -1,21 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using PROG6212_New_POE.Data;
 using PROG6212_New_POE.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.IO;
 
 namespace PROG6212_New_POE.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly CMCSContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // In-memory lists to simulate a database
-        private static List<User> Users = new List<User>();
-        private static List<Claim> Claims = new List<Claim>();
-
-        public HomeController(IHttpContextAccessor httpContextAccessor)
+        // Constructor with dependency injection
+        public HomeController(CMCSContext context, IHttpContextAccessor httpContextAccessor)
         {
+            _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -41,34 +43,52 @@ namespace PROG6212_New_POE.Controllers
         }
 
         [HttpPost]
-        public IActionResult SubmitClaim(Claim claim, IFormFile file)
+        public async Task<IActionResult> SubmitClaim(Claim claim, IFormFile file)
         {
             if (file != null && file.Length > 0)
             {
+                var allowedExtensions = new[] { ".pdf", ".docx", ".xlsx", ".png", ".jpg" };
+                var extension = Path.GetExtension(file.FileName).ToLower();
+
+                // Validate file extension
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ViewBag.Error = "File type must be .pdf, .docx, or .xlsx, or .png, or .jpg. ";
+                    return View(claim);
+                }
+
+                // Validate file size (e.g., max 2 MB)
                 if (file.Length > 2 * 1024 * 1024)
                 {
-                    ModelState.AddModelError("File", "File size exceeds 2 MB.");
-                    return View();
+                    ViewBag.Error = "File size cannot exceed 2 MB.";
+                    return View(claim);
                 }
 
-                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".xlsx" };
-                var fileExtension = System.IO.Path.GetExtension(file.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(fileExtension))
+                // Save the file to a folder in the server
+                var uploadsPath = Path.Combine("wwwroot/uploads");
+                if (!Directory.Exists(uploadsPath))
                 {
-                    ModelState.AddModelError("File", "File type must be .pdf, .doc, .docx, or .xlsx.");
-                    return View();
+                    Directory.CreateDirectory(uploadsPath);
                 }
 
-                // Save file (you may save it on the server or simulate storage)
+                var filePath = Path.Combine(uploadsPath, file.FileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Save the file name in the claim
                 claim.FileName = file.FileName;
             }
 
+            // Set default status and save claim to the database
             claim.Status = "Pending";
-            Claims.Add(claim);
+            _context.Claims.Add(claim);
+            await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("TrackClaims");
         }
+
 
         // Track Claims Page
         [HttpGet]
@@ -80,15 +100,18 @@ namespace PROG6212_New_POE.Controllers
         [HttpPost]
         public IActionResult TrackClaims(string firstName, string lastName)
         {
-            var userClaims = Claims.Where(c => c.FirstName == firstName && c.LastName == lastName).ToList();
+            var userClaims = _context.Claims
+                .Where(c => c.FirstName == firstName && c.LastName == lastName)
+                .ToList();
+
             if (userClaims.Any())
             {
                 return View(userClaims);
             }
+
             ViewBag.Message = "No claims found for the entered name.";
             return View(new List<Claim>());
         }
-
 
         // Verify Claims Page (for Programme Coordinators and Academic Managers)
         [HttpGet]
@@ -101,16 +124,18 @@ namespace PROG6212_New_POE.Controllers
                 return RedirectToAction("Login");
             }
 
-            return View(Claims);
+            var claims = _context.Claims.ToList(); // Retrieve claims from the database
+            return View(claims);
         }
 
         [HttpPost]
         public IActionResult VerifyClaims(int claimId, string action)
         {
-            var claim = Claims.FirstOrDefault(c => c.ClaimID == claimId);
+            var claim = _context.Claims.FirstOrDefault(c => c.ClaimID == claimId);
             if (claim != null)
             {
                 claim.Status = action == "Approve" ? "Approved" : "Rejected";
+                _context.SaveChanges(); // Save changes to the database
             }
 
             return RedirectToAction("VerifyClaims");
@@ -126,7 +151,7 @@ namespace PROG6212_New_POE.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            var user = Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
             if (user != null)
             {
                 _httpContextAccessor.HttpContext?.Session.SetString("UserRole", user.Role);
@@ -154,13 +179,14 @@ namespace PROG6212_New_POE.Controllers
         [HttpPost]
         public IActionResult SignUp(User user)
         {
-            if (Users.Any(u => u.Email == user.Email))
+            if (_context.Users.Any(u => u.Email == user.Email))
             {
                 ModelState.AddModelError("Email", "Email is already registered.");
                 return View();
             }
 
-            Users.Add(user);
+            _context.Users.Add(user);
+            _context.SaveChanges();
             return RedirectToAction("Login");
         }
     }

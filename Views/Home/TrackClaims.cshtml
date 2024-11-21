@@ -25,11 +25,13 @@
         <thead>
             <tr>
                 <th>Claim ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
                 <th>Hours Worked</th>
                 <th>Hourly Rate</th>
                 <th>Total Amount</th>
-                <th>Status</th>
                 <th>File Name</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -37,15 +39,24 @@
             {
                 <tr>
                     <td>@claim.ClaimID</td>
+                    <td>@claim.FirstName</td>
+                    <td>@claim.LastName</td>
                     <td>@claim.HoursWorked</td>
                     <td>@claim.HourlyRate</td>
                     <td>@(claim.HoursWorked * claim.HourlyRate)</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(claim.FileName))
+                        {
+                            <a href="@Url.Content("~/uploads/" + claim.FileName)" target="_blank">@claim.FileName</a>
+                        }
+                    </td>
                     <td>@claim.Status</td>
-                    <td>@claim.FileName</td>
                 </tr>
             }
         </tbody>
     </table>
+
+
 }
 else if (ViewBag.Message != null)
 {
