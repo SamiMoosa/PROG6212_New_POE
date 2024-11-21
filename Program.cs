@@ -13,6 +13,9 @@ builder.Services.AddDbContext<CMCSContext>(options =>
 // Add session support.
 builder.Services.AddSession();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
