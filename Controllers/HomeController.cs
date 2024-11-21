@@ -83,11 +83,12 @@ namespace PROG6212_New_POE.Controllers
             var userClaims = Claims.Where(c => c.FirstName == firstName && c.LastName == lastName).ToList();
             if (userClaims.Any())
             {
-                return View("ClaimList", userClaims);
+                return View(userClaims);
             }
             ViewBag.Message = "No claims found for the entered name.";
-            return View();
+            return View(new List<Claim>());
         }
+
 
         // Verify Claims Page (for Programme Coordinators and Academic Managers)
         [HttpGet]
