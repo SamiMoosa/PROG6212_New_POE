@@ -28,7 +28,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="TrackClaim">Track Claims</a>
                         </li>
-                        @if (HttpContext.Current?.Session?.GetString("UserRole") == null)
+                        @if (ViewData["UserRole"] == null)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
@@ -36,7 +36,7 @@
                         }
                         else
                         {
-                            @if (HttpContext.Current.Session.GetString("UserRole") == "Programme Coordinator" || HttpContext.Current.Session.GetString("UserRole") == "Academic Manager")
+                            @if (ViewData["UserRole"]?.ToString() == "Programme Coordinator" || ViewData["UserRole"]?.ToString() == "Academic Manager")
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="VerifyClaims">Verify Claims</a>
