@@ -6,7 +6,6 @@
     <title>@ViewData["Title"] - PROG6212_New_POE</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/PROG6212_New_POE.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -26,28 +25,22 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SubmitClaim">Submit Claim</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="TrackClaim">Track Claims</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="TrackClaims">Track Claims</a>
                         </li>
-                        @if (ViewData["UserRole"] == null)
+                        @if (ViewData["UserRole"]?.ToString() == "Programme Coordinator" || ViewData["UserRole"]?.ToString() == "Academic Manager")
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
-                            </li>
-                        }
-                        else
-                        {
-                            @if (ViewData["UserRole"]?.ToString() == "Programme Coordinator" || ViewData["UserRole"]?.ToString() == "Academic Manager")
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="VerifyClaims">Verify Claims</a>
-                                </li>
-                            }
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="VerifyClaims">Verify Claims</a>
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignUp">Sign Up</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
                         </li>
                     </ul>
                 </div>
@@ -59,7 +52,6 @@
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - PROG6212_New_POE - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
